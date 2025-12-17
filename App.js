@@ -1,140 +1,69 @@
-import { useState } from "react";
-import {
-  View,
-  StatusBar,
-  Text,
-  StyleSheet,
-  Image,
-  TextInput,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { useEffect, useState } from "react";
+import { StatusBar } from "expo-status-bar";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const App = () => {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const handleChange = () => {
-    if (!form.email || !form.password) {
-      Alert.alert("Error", "Please fill in both fields");
-      return;
-    }
-    Alert.alert("Account not found");
-  };
+import OnBoardingScreen from "./Screens/onBoarding";
+import Profile from "./Screens/Profile";
+import SplashScreen from "./Screens/SplashScreen";
+
+const Stack = createNativeStackNavigator();
+
+export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isOnBoardingDone, setIsOnboardingDone] = useState(false);
+
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      try {
+        const value = await AsyncStorage.getItem("onboardingCompleted");
+
+        if (value === "true") {
+          setIsOnboardingDone(true);
+        }
+      } catch (e) {
+        console.log("Error reading AsyncStorage", e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    checkOnboarding();
+  }, []);
+
+  if (isLoading) {
+    return <SplashScreen />;
+  }
+
   return (
-    <View style={styles.safeArea}>
+    <>
       <StatusBar
         translucent={true}
-        barStyle="dark-content" // Options: 'default', 'light-content', 'dark-content'
-        backgroundColor="#E3E9F3" // Android only
-      />
-      <ScrollView style={styles.scrollView}>
-        <Image
-          style={styles.logo}
-          source={require("./assets/icon.png")}
-          alt="Logo"
-        />
-        <Text style={styles.heading}>Sign in to MyApp</Text>
-        <Text style={styles.text}>Get access to your portfolio and more</Text>
-        <View>
-          <Text style={styles.inputLabel}>Email address</Text>
-          <TextInput
-            style={styles.inputBox}
-            value={form.email}
-            keyboardType="email-address"
-            placeholder="john@example.com"
-            onChangeText={(email) => setForm({ ...form, email })}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-        </View>
-        <View>
-          <Text style={styles.inputLabel}>Password</Text>
-          <TextInput
-            secureTextEntry={true}
-            style={styles.inputBox}
-            value={form.password}
-            autoCapitalize="none"
-            placeholder="*******"
-            onChangeText={(password) => setForm({ ...form, password })}
-          />
-        </View>
-        <TouchableOpacity onPress={handleChange} activeOpacity={0.7}>
-          <View style={styles.btn}>
-            <Text style={styles.btnText}>Sign in</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={{ marginTop: 250 }} onPress={() => {}}>
-          <Text style={styles.bottom}>Don't have an account? Sign up</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
+        barStyle="defualt" // Options: 'default', 'light-content', 'dark-content'
+      ></StatusBar>
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{
+            headerStyle: {},
+            headerTitleStyle: {
+              fontWeight: "bold",
+            },
+          }}
+        >
+          {isOnBoardingDone ? (
+            <Stack.Screen name="Profile" component={Profile}></Stack.Screen>
+          ) : (
+            <Stack.Screen name="onBoarding">
+              {(props) => (
+                <OnBoardingScreen
+                  {...props}
+                  setIsOnboardingDone={setIsOnboardingDone}
+                />
+              )}
+            </Stack.Screen>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </>
   );
-};
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#E3E9F3",
-    paddingTop: 40,
-  },
-  scrollView: {
-    flexGrow: 1,
-    paddingBottom: 10,
-    paddingHorizontal: 10,
-    backgroundColor: "#E3E9F3",
-  },
-  logo: {
-    height: 80,
-    width: 80,
-    resizeMode: "cover",
-    alignSelf: "center",
-    marginTop: 100,
-    borderRadius: 20,
-    marginBottom: 20,
-  },
-  heading: {
-    fontSize: 18,
-    fontWeight: 700,
-    alignSelf: "center",
-    marginBottom: 4,
-  },
-  text: {
-    fontSize: 10,
-    alignSelf: "center",
-    marginBottom: 20,
-  },
-  inputLabel: {
-    fontSize: 15,
-    marginLeft: 20,
-    fontWeight: 500,
-  },
-  inputBox: {
-    backgroundColor: "#ffffff",
-    width: "90%",
-    paddingVertical: 8,
-    alignSelf: "center",
-    borderRadius: 8,
-    paddingLeft: 10,
-    margin: 4,
-    fontWeight: 400,
-    fontSize: 14,
-  },
-  btn: {
-    marginTop: 20,
-    backgroundColor: "#0452E8",
-    width: "90%",
-    paddingVertical: 8,
-    alignSelf: "center",
-    borderRadius: 8,
-  },
-  btnText: {
-    color: "#ffffff",
-    textAlign: "center",
-  },
-  bottom: {
-    textAlign: "center",
-    fontWeight: 500,
-  },
-});
-
-export default App;
+}
