@@ -15,16 +15,16 @@ import Logo from "../Images/Logo.png";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const OnBoardingScreen = ({ setIsOnboardingDone }) => {
-  const [form, setForm] = useState({ name: "", email: "" });
+  const [form, setForm] = useState({ firstName: "", email: "" });
 
   const handleSubmit = async () => {
-    if (!form.name || !form.email) {
+    if (!form.firstName || !form.email) {
       Alert.alert("Fill the input fields");
       return;
     }
-    setForm({ name: "", email: "" });
     try {
       await AsyncStorage.setItem("onboardingCompleted", "true");
+      await AsyncStorage.setItem("user", JSON.stringify(form));
       setIsOnboardingDone(true);
     } catch (e) {
       Alert.alert("Something went wrong.");
@@ -50,9 +50,9 @@ const OnBoardingScreen = ({ setIsOnboardingDone }) => {
             <Text style={styles.inputLabel}>First Name</Text>
             <TextInput
               style={styles.input}
-              value={form.name}
+              value={form.firstName}
               placeholder="John Doe"
-              onChangeText={(name) => setForm({ ...form, name })}
+              onChangeText={(firstName) => setForm({ ...form, firstName })}
             ></TextInput>
             <Text style={styles.inputLabel}>Email</Text>
             <TextInput

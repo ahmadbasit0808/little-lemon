@@ -51,7 +51,11 @@ export default function App() {
           }}
         >
           {isOnBoardingDone ? (
-            <Stack.Screen name="Profile" component={Profile}></Stack.Screen>
+            <Stack.Screen name="Profile">
+              {(props) => (
+                <Profile {...props} setIsOnboardingDone={setIsOnboardingDone} />
+              )}
+            </Stack.Screen>
           ) : (
             <Stack.Screen name="onBoarding">
               {(props) => (
