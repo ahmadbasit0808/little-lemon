@@ -7,20 +7,27 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import OnBoardingScreen from "./Screens/onBoarding";
 import Profile from "./Screens/Profile";
 import SplashScreen from "./Screens/SplashScreen";
+import HomeScreen from "./Screens/HomeScreen";
+import { StackScreen } from "react-native-screens";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isOnBoardingDone, setIsOnboardingDone] = useState(false);
 
   useEffect(() => {
     const checkOnboarding = async () => {
       try {
         const value = await AsyncStorage.getItem("onboardingCompleted");
+        const loggedIn = await AsyncStorage.getItem("loggedIn");
 
         if (value === "true") {
           setIsOnboardingDone(true);
+        }
+        if (loggedIn === "true") {
+          setIsLoggedIn(true);
         }
       } catch (e) {
         console.log("Error reading AsyncStorage", e);
@@ -51,11 +58,19 @@ export default function App() {
           }}
         >
           {isOnBoardingDone ? (
-            <Stack.Screen name="Profile">
-              {(props) => (
-                <Profile {...props} setIsOnboardingDone={setIsOnboardingDone} />
-              )}
-            </Stack.Screen>
+            isLoggedIn ? (
+              <Stack.Screen name="Home" component={HomeScreen} />
+            ) : (
+              <Stack.Screen name="Profile">
+                {(props) => (
+                  <Profile
+                    {...props}
+                    setIsOnboardingDone={setIsOnboardingDone}
+                    setIsLoggedIn={setIsLoggedIn}
+                  />
+                )}
+              </Stack.Screen>
+            )
           ) : (
             <Stack.Screen name="onBoarding">
               {(props) => (

@@ -4,6 +4,8 @@ import {
   StyleSheet,
   Text,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   TextInput,
   Image,
   Pressable,
@@ -12,7 +14,7 @@ import { Checkbox } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 
-const Profile = ({ setIsOnboardingDone }) => {
+const Profile = ({ setIsOnboardingDone, setIsLoggedIn }) => {
   const [form, setForm] = useState({
     firstName: "",
     email: "",
@@ -47,7 +49,9 @@ const Profile = ({ setIsOnboardingDone }) => {
     }
     try {
       await AsyncStorage.setItem("user", JSON.stringify(form));
+      await AsyncStorage.setItem("loggedIn", "true");
       Alert.alert("Successful");
+      setIsLoggedIn(true);
     } catch (e) {
       Alert.alert("Error");
     }
@@ -108,7 +112,11 @@ const Profile = ({ setIsOnboardingDone }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+    >
       <Text style={styles.heading}>Personal Information</Text>
       <View style={styles.imageContainer}>
         {form.image ? (
@@ -245,7 +253,7 @@ const Profile = ({ setIsOnboardingDone }) => {
           </Pressable>
         </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
